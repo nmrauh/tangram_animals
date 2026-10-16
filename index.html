@@ -182,7 +182,7 @@
   </div>
   <footer>
     <button class="reset" id="reset" type="button">Reset pieces</button>
-    <p class="help">Drag a piece to move it. <kbd>Right-click</kbd> turns it 45°; <kbd>Shift</kbd>+right-click or <kbd>F</kbd> flips it. On a touchscreen, tap to turn and press and hold to flip.</p>
+    <p class="help">Drag a piece to move it. <kbd>Right-click</kbd> turns it 45°; <kbd>middle-click</kbd> or <kbd>F</kbd> flips it. On a touchscreen, tap to turn and press and hold to flip.</p>
   </footer>
 </div>
 <script>
@@ -412,6 +412,8 @@ svg.addEventListener("pointerdown", e => {
     e.shiftKey ? flip(i) : turn(i);
     return;
   }
+  // Middle button: flip. (Firefox always opens its own menu on Shift+right-click, so flipping needs another button.)
+  if (e.button === 1) { e.preventDefault(); flip(+el.dataset.i); return; }
   if (e.button !== 0) return;
   e.preventDefault();
   const i = +el.dataset.i, [px, py] = toBoard(e);
@@ -444,6 +446,8 @@ function endDrag(e) {
 svg.addEventListener("pointerup", endDrag);
 svg.addEventListener("pointercancel", endDrag);
 svg.addEventListener("contextmenu", e => e.preventDefault());
+svg.addEventListener("mousedown", e => { if (e.button === 1) e.preventDefault(); });   // no autoscroll on middle-click
+svg.addEventListener("auxclick", e => { if (e.button === 1) e.preventDefault(); });
 svg.addEventListener("pointerover", e => { const el = e.target.closest(".piece"); if (el && !drag) lastPiece = +el.dataset.i; });
 document.addEventListener("keydown", e => {
   if (lastPiece == null || e.ctrlKey || e.metaKey || e.altKey) return;
