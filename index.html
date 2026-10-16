@@ -403,7 +403,16 @@ function toBoard(e) {
 }
 svg.addEventListener("pointerdown", e => {
   const el = e.target.closest(".piece");
-  if (!el || e.button !== 0) return;
+  if (!el) return;
+  // Right button (or Control-click on a Mac): turn, or flip with Shift.
+  // Handled here rather than on "contextmenu", which some browsers (Firefox) skip when Shift is held.
+  if (e.button === 2 || (e.button === 0 && e.ctrlKey)) {
+    e.preventDefault();
+    const i = +el.dataset.i;
+    e.shiftKey ? flip(i) : turn(i);
+    return;
+  }
+  if (e.button !== 0) return;
   e.preventDefault();
   const i = +el.dataset.i, [px, py] = toBoard(e);
   raise(i);
@@ -434,13 +443,7 @@ function endDrag(e) {
 }
 svg.addEventListener("pointerup", endDrag);
 svg.addEventListener("pointercancel", endDrag);
-svg.addEventListener("contextmenu", e => {
-  e.preventDefault();
-  const el = e.target.closest(".piece");
-  if (!el) return;
-  const i = +el.dataset.i;
-  e.shiftKey ? flip(i) : turn(i);
-});
+svg.addEventListener("contextmenu", e => e.preventDefault());
 svg.addEventListener("pointerover", e => { const el = e.target.closest(".piece"); if (el && !drag) lastPiece = +el.dataset.i; });
 document.addEventListener("keydown", e => {
   if (lastPiece == null || e.ctrlKey || e.metaKey || e.altKey) return;
